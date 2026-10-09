@@ -349,6 +349,24 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
 .brow .bn{display:grid}
 .brow .bar{height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden}.brow .bar div{height:100%;background:var(--cc)}
 @media (max-width:640px){.lvlgrid,.blindgrid{grid-template-columns:minmax(0,1fr)}.brow{grid-template-columns:24px auto minmax(0,1fr)}.brow .bar{grid-column:1/-1}.svrow{grid-template-columns:auto minmax(0,1fr)}.svb{grid-column:1/-1}}
+.recrace{max-width:560px}
+.kt{display:grid;gap:3px}
+.ksz{justify-self:start;font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;border:1px solid currentColor;border-radius:5px;padding:1px 6px}
+.ksz.s1{color:var(--narrow)}.ksz.s2{color:var(--muted)}.ksz.s3{color:var(--good)}
+.sects{display:grid;gap:8px}
+.sect{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.sect>summary{cursor:pointer;list-style:none;padding:12px 16px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+.sect>summary::-webkit-details-marker{display:none}
+.sect>summary .st{font-weight:700}.sect>summary .st::before{content:"▸ ";color:var(--muted)}
+.sect[open]>summary .st::before{content:"▾ "}
+.sect>.sbody{padding:0 16px 16px;display:grid;gap:10px}
+.sharebox .sect{background:transparent}
+.sharebox{gap:10px}
+.restart{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.twgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.twgrid .alt .c{display:flex;gap:8px;align-items:center}
+.rpre{display:block;font-family:var(--f-body);font-size:16px;font-weight:500;color:var(--cc);letter-spacing:.02em}
+@media (max-width:760px){.twgrid{grid-template-columns:minmax(0,1fr)}}
 .kenner{border:1px dashed var(--line);border-radius:10px;padding:10px 14px;display:grid;gap:10px}
 .kenner>summary{cursor:pointer;list-style:none}.kenner>summary::-webkit-details-marker{display:none}
 .kenner>summary::before{content:"▸ ";color:var(--muted)}.kenner[open]>summary::before{content:"▾ "}
@@ -577,7 +595,7 @@ function renderRail(){
   list.forEach((k,ix)=>{
     if(ix===5&&st.content.length) r.append(el("span",{class:"sep"},"│"));
     if(k==="review") r.append(el("span",{class:"sep"},"│"));
-    const n={start:"0",basics:"1",fantasy:"2",taste:"3",content:"4",review:"6",result:"★",blind:"✓"}[k]||`5.${ix-4}`;
+    const n={start:"0",basics:"1",fantasy:"2",taste:"3",content:"4",review:"5",result:"★",blind:"✓"}[k]||`4.${ix-4}`;
     r.append(el("button",{"aria-current":k===st.stage?"step":null,class:ix<cur?"done":null,onclick(){go(k);}},el("span",{class:"n"},n),stageLabel(k)));
   });
 }
@@ -792,7 +810,7 @@ function stageDeep(cid){
       el("div",{class:"chips"},roleBtns,weakBtn),
       el("div",{class:"tiles"},base.map(f=>tileEl(cid,f))),
       el("div",{class:"tiles-legend"},el("span",{},el("b",{class:"g"},"◆")," passt"),el("span",{},el("b",{class:"y"},"◇")," knapp, halbe Punkte"),el("span",{},el("b",{class:"x"},"▽")," passt kaum, Viertelpunkte"),c.fit?el("span",{},el("b",{class:"g"},"●●●")," Eignung"):null));
-  return [ head(`Schritt 5.${ix+1} · Vertiefung · zählt ${fmt(w)} ${w===1?"Punkt":"Punkte"}`,c.name,qs.length?`Hier geht es darum, was ${c.name} von dir verlangt. Du musst dafür nicht wissen, welche Klasse du spielen willst: Beantworte einfach die ${qs.length===1?"Frage":"Fragen"}, die Zuordnung zu den Klassen übernimmt der Finder. Dein Spielgefühl ist schon eingerechnet.`:`Für ${c.name} gibt es keine eigenen Fragen. Hier zählen dein Spielgefühl und die Gedanken unten.`),
+  return [ head(`Schritt 4.${ix+1} · Vertiefung · zählt ${fmt(w)} ${w===1?"Punkt":"Punkte"}`,c.name,qs.length?`Hier geht es darum, was ${c.name} von dir verlangt. Du musst dafür nicht wissen, welche Klasse du spielen willst: Beantworte einfach die ${qs.length===1?"Frage":"Fragen"}, die Zuordnung zu den Klassen übernimmt der Finder. Dein Spielgefühl ist schon eingerechnet.`:`Für ${c.name} gibt es keine eigenen Fragen. Hier zählen dein Spielgefühl und die Gedanken unten.`),
     meter(nIn,nNr,base.length,"passen gut oder knapp",`${nIn} gut · ${nNr} knapp · ${base.length-nIn-nNr} kaum`),
     qs.length?el("div",{class:"block"},el("h3",{class:"sec"},`Was ${c.name} von dir verlangt`),el("div",{class:"qlist"},qEls)):null,
     c.fit?el("div",{class:"callout"},el("b",{},"Eignung: "),strong.length?`Stark sind hier vor allem ${strong.slice(0,6).map(specName).join(", ")}${strong.length>6?" und weitere":""}. `:"",
@@ -844,7 +862,7 @@ function stageReview(){
       el("td",{},el("button",{class:"del",onclick(){go(x.stage);}},"zur Frage")));
   };
   const wrows=[["__fund","Vorlieben aus den Grundlagen","Grundgewicht 3: Rolle, Kampfstil und Klasse prägen jede Spielminute"],["__fan","Klassenfantasie","Grundgewicht 3: Du verbringst Hunderte Stunden mit dieser Figur"],["__aes","Rüstung und Waffenlook","Grundgewicht 1,5: Du siehst sie ständig, sie ändert aber nicht, wie du spielst"],...st.content.map(cid=>[cid,cById(cid).name,`Grundgewicht ${fmt(cById(cid).base)} · Platz ${st.content.indexOf(cid)+1} ×${fmt(rankF(cid))}`])];
-  return [ head("Schritt 6 · Rückblick","Schau noch einmal zurück","Spätere Antworten schärfen oft frühere. Hier siehst du, was deine Entscheidungen bewirkt haben, und kannst nachjustieren, bevor du das Ergebnis anschaust."),
+  return [ head("Schritt 5 · Rückblick","Schau noch einmal zurück","Spätere Antworten schärfen oft frühere. Hier siehst du, was deine Entscheidungen bewirkt haben, und kannst nachjustieren, bevor du das Ergebnis anschaust."),
     el("div",{class:"block"},el("h3",{class:"sec"},"Gewichte nachjustieren"),
       el("p",{class:"stagehint small"},"Die Grundgewichte stehen fest, weil manche Teile des Spiels schlicht mehr Zeit füllen als andere. Du kannst sie nur dämpfen oder verstärken."),
       el("div",{class:"tablebox"},el("table",{class:"wtable"},el("thead",{},el("tr",{},el("th",{},"Bereich"),el("th",{},"Herleitung"),el("th",{style:"text-align:right"},"Gewicht"),el("th",{style:"text-align:right"},"Anpassen"))),
@@ -882,21 +900,20 @@ function freshRestart(){ if(!confirm("Alle Antworten löschen und frisch starten
   Object.assign(st,{fan:{},aes:{armor:[],look:[]},nudge:{},gut:null,f:{range:{},type:{},role:{},cls:{},fac:{},race:{}},taste:{},imp:1,content:[],ans:{},manual:{},blind:null});
   chal=null; undoSnap=null; go("start"); }
 function shareBlock(){
-  const t=resultText(), msg=el("p",{class:"msg small"});
+  const t=resultText(), msg=el("p",{class:"msg small",style:"margin:0"});
   const canShare=typeof navigator!=="undefined"&&navigator.share;
-  return el("div",{class:"block sharebox"},el("h3",{class:"sec"},"Teilen, speichern, neu starten"),
-    el("p",{class:"stagehint small",style:"margin:0"},"So sieht deine Nachricht aus. Der Gruppencode am Ende landet bei deinen Freunden im Tab „Gruppe“."),
-    el("pre",{class:"sharetxt"},t),
+  return el("div",{class:"block sharebox"},
     el("div",{class:"actions"},
-      canShare?el("button",{class:"btn",onclick(){ navigator.share({text:t}).catch(()=>{}); }},"Teilen …"):null,
+      canShare?el("button",{class:"btn",onclick(){ navigator.share({text:t}).catch(()=>{}); }},"Ergebnis teilen …"):null,
       el("a",{class:"btn"+(canShare?" ghost":""),href:"https://wa.me/?text="+encodeURIComponent(t),target:"_blank",rel:"noopener"},"Per WhatsApp schicken"),
-      el("button",{class:"btn ghost",onclick(){ copyText(t,msg,"Kopiert. Ab damit in WhatsApp oder Discord."); }},"Text kopieren")),
-    el("div",{class:"actions"},
-      el("button",{class:"btn ghost",onclick(){ if(saveResult()){ msg.textContent="Gespeichert. Du findest es auf der Startseite unter „Deine gespeicherten Ergebnisse“."; } }},"Ergebnis speichern"),
-      el("button",{class:"btn ghost",onclick(){ startBlind(); }},st.blind&&st.blind.verdict?"Gegenprobe wiederholen":"Gegenprobe machen"),
-      el("button",{class:"btn ghost",onclick(){ freshRestart(); }},"Frisch neu starten")),
+      el("button",{class:"btn ghost",onclick(){ copyText(t,msg,"Kopiert. Ab damit in WhatsApp oder Discord."); }},"Kopieren"),
+      el("button",{class:"btn ghost",onclick(){ if(saveResult()) msg.textContent="Gespeichert. Du findest es auf der Startseite unter „Deine gespeicherten Ergebnisse“."; }},"Speichern")),
     msg,
-    el("p",{class:"small muted",style:"margin:0"},el("b",{},"Unsicher? "),"Die Gegenprobe ist ein Blindtest mit deinen vier besten Klassen: Du siehst nur Beschreibungen ohne Namen und sortierst nach Bauchgefühl. Andere Fragen, andere Gewichtung. Danach weißt du, ob das Ergebnis trägt oder ob du es verwerfen solltest."));
+    sect("sharetxt","Nachricht ansehen","mit Gruppencode für den Tab „Gruppe“",el("pre",{class:"sharetxt"},t)),
+    el("div",{class:"restart"},el("span",{class:"small muted"},"Unsicher? "),
+      el("button",{class:"linkbtn",onclick(){ startBlind(); }},st.blind&&st.blind.verdict?"Gegenprobe wiederholen":"Gegenprobe als Blindtest machen"),
+      el("span",{class:"small muted"}," · "),
+      el("button",{class:"linkbtn",onclick(){ freshRestart(); }},"Frisch neu starten")));
 }
 
 /* ================= blind test (Gegenprobe) ================= */
@@ -975,17 +992,27 @@ function stageBlind(){
 let chal=null, undoSnap=null;
 function simulate(mut){ const keep=st; st=JSON.parse(JSON.stringify(keep)); try{ mut(st); return classTotals(); } finally { st=keep; } }
 const KNOB_L={__fund:"Vorlieben aus den Grundlagen",__fan:"Klassenfantasie",__aes:"Rüstung und Waffenlook"};
+const SIZE_L={1:"kleine Korrektur",2:"deutliche Änderung",3:"große Kursänderung"};
+function wKeys(){ return ["__fund","__fan","__aes",...st.content]; }
+function shareOf(k){ const tot=wKeys().reduce((a,x)=>a+weightOf(x),0)||1; return Math.round(weightOf(k)/tot*100); }
 function knobs(lead,ch){
   const out=[], keys=["__fund","__fan","__aes",...st.content,"__taste"];
   for(const k of keys){ const cur=nudgeOf(k);
     for(const v of [-1,0,1]){ if(v===cur) continue;
-      const name=k==="__taste"?null:(KNOB_L[k]||cById(k).name);
+      const name=k==="__taste"?null:(KNOB_L[k]||cById(k).name), d=Math.abs(v-cur);
       const label=k==="__taste"?(v<cur?"Reibungen im Spielgefühl milder werten":"Reibungen im Spielgefühl strenger werten"):`Gewicht für ${name} auf „${NUDGE_L.find(x=>x[0]===v)[1]}“`;
-      out.push({label,cost:Math.abs(v-cur),where:"Rückblick · Gewichte",apply:s=>{ if(v===0) delete s.nudge[k]; else s.nudge[k]=v; }}); } }
-  for(let v=0;v<IMP_L.length;v++) if(v!==st.imp) out.push({label:`Objektive Eignung: „${IMP_L[v]}“`,cost:Math.abs(v-st.imp),where:"Rückblick · Gewichte",apply:s=>{s.imp=v;}});
-  for(const c of [lead,ch]) for(let v=0;v<FAN_L.length;v++) if(v!==st.fan[c]) out.push({label:`${CL[c]} in der Fantasie: „${FAN_L[v]}“`,cost:st.fan[c]==null?1:Math.abs(v-st.fan[c]),where:"Fantasie",apply:s=>{s.fan[c]=v;}});
+      const after=k==="__taste"?null:(()=>{ const ws=wKeys().map(x=>[x,weightOf(x)*(x===k?NUDGE_F[v]/NUDGE_F[cur]:1)]), tot=ws.reduce((a,x)=>a+x[1],0)||1; return Math.round(ws.find(x=>x[0]===k)[1]/tot*100); })();
+      const ctx=k==="__taste"?"Bestimmt, wie viele Punkte eine Klasse verliert, die nicht zu deinem Spielgefühl passt.":`${name} macht bisher ${shareOf(k)} % deines Spielerlebnisses aus, danach wären es ${after} %.`;
+      out.push({label,size:d===1?1:3,ctx,where:"Rückblick · Gewichte",apply:s=>{ if(v===0) delete s.nudge[k]; else s.nudge[k]=v; }}); } }
+  for(let v=0;v<IMP_L.length;v++) if(v!==st.imp) out.push({label:`Objektive Eignung: „${IMP_L[v]}“`,size:Math.abs(v-st.imp)===1?1:3,ctx:"Bestimmt, wie stark zählt, ob eine Spezialisierung für einen Inhalt objektiv gut geeignet ist.",where:"Rückblick · Gewichte",apply:s=>{s.imp=v;}});
+  for(const c of [lead,ch]){ const cur=st.fan[c]; for(let v=0;v<FAN_L.length;v++){ if(v===cur) continue; const d=Math.abs(v-(cur==null?1:cur));
+    const more=v>(cur==null?1:cur);
+    out.push({label:`${CL[c]} in der Fantasie: „${FAN_L[v]}“`,size:d<=1?1:d===2?2:3,
+      ctx:cur==null?`Du hast ${CL[c]} in der Fantasie noch nicht bewertet, die Klasse bekommt dort also keine Punkte. Schon „${FAN_L[v]}“ würde reichen. Die Klassenfantasie macht ${shareOf("__fan")} % deines Spielerlebnisses aus.`
+        :`Die Klassenfantasie macht ${shareOf("__fan")} % deines Spielerlebnisses aus. ${CL[c]} müsste dich als Figur ${d<=1?"etwas":"deutlich"} ${more?"mehr":"weniger"} reizen als „${FAN_L[cur]}“.`,
+      where:"Fantasie",apply:s=>{s.fan[c]=v;}}); } }
   for(const qk of TASTE){ if(st.taste[qk]===undefined||!tasteVisible(qk)) continue;
-    out.push({label:`„${Q[qk].answers[st.taste[qk]].label}“ auf „Egal“`,cost:1.5,where:"Spielgefühl",apply:s=>{delete s.taste[qk];}}); }
+    out.push({label:`„${Q[qk].answers[st.taste[qk]].label}“ auf „Egal“`,size:2,ctx:"Du hast hier eine klare Vorliebe angegeben. Wäre sie dir in Wahrheit egal, kippt das Ergebnis.",where:"Spielgefühl",apply:s=>{delete s.taste[qk];}}); }
   for(const kn of out){ const res=simulate(kn.apply); kn.lead=res[0]?res[0].cls:null; kn.res=res;
     const a=res.find(x=>x.cls===lead), b=res.find(x=>x.cls===ch); kn.gap=(a?a.pts:0)-(b?b.pts:0); }
   return out; }
@@ -994,27 +1021,30 @@ function diffRows(L,H){
   const why=(x,b,cid)=>{ if(!b) return "keine passende Spezialisierung"; const f=fitOf(cid,b.i), sp=spec(x,b.i), bits=[S[b.i].name];
     if(f) bits.push(`Eignung ${FIT_L[f]}`); if(b.st==="nr") bits.push("knapp passend, halbe Punkte"); if(sp&&sp.taste.m<1) bits.push(`Reibung ×${fmt(sp.taste.m)}`); return bits.join(" · "); };
   for(const cid of st.content){ const a=L.per[cid], b=H.per[cid];
-    rows.push({l:cById(cid).name,a:a?a.pts:0,b:b?b.pts:0,wa:why(L,a,cid),wb:why(H,b,cid)}); }
+    rows.push({k:cid,l:cById(cid).name,a:a?a.pts:0,b:b?b.pts:0,wa:why(L,a,cid),wb:why(H,b,cid)}); }
   const fl=c=>st.fan[c]!=null?FAN_L[st.fan[c]]:"nicht bewertet";
-  rows.push({l:"Klassenfantasie",a:L.fan,b:H.fan,wa:fl(L.cls),wb:fl(H.cls)});
-  rows.push({l:"Rüstung und Waffenlook",a:L.aes,b:H.aes,wa:"",wb:""});
-  rows.push({l:"Vorlieben aus den Grundlagen",a:L.fund,b:H.fund,wa:"",wb:""});
+  rows.push({k:"__fan",l:"Klassenfantasie",a:L.fan,b:H.fan,wa:fl(L.cls),wb:fl(H.cls)});
+  rows.push({k:"__aes",l:"Rüstung und Waffenlook",a:L.aes,b:H.aes,wa:"",wb:""});
+  rows.push({k:"__fund",l:"Vorlieben aus den Grundlagen",a:L.fund,b:H.fund,wa:"",wb:""});
   return rows.map(r=>({...r,d:r.a-r.b})); }
 function closeBlock(ct){
   if(ct.length<2) return null;
   const L=ct[0]; if(!chal||chal===L.cls||!ct.some(x=>x.cls===chal)) chal=(st.gut&&st.gut!==L.cls&&ct.some(x=>x.cls===st.gut))?st.gut:ct[1].cls;
   const H=ct.find(x=>x.cls===chal), gap=L.pts-H.pts, pct=L.pts?gap/L.pts*100:0;
   const verdict=pct<5?"Kopf an Kopf":null;
-  const ks=knobs(L.cls,H.cls), flipsH=ks.filter(k=>k.lead===H.cls).sort((a,b)=>a.cost-b.cost||a.gap-b.gap), anyFlip=ks.filter(k=>k.lead!==L.cls);
-  const robust=!anyFlip.length?"Kein einzelner Regler stößt die Klasse vom Thron, das Ergebnis ist stabil.":anyFlip.length<=2?`${anyFlip.length===1?"Ein einzelner Regler würde":"Zwei einzelne Regler würden"} die Spitze ändern, sonst hält das Ergebnis.`:`${anyFlip.length} einzelne Regler würden die Spitze ändern. Das Ergebnis ist wackelig, hier lohnt sich ehrliches Nachdenken.`;
-  const vd=verdict||(anyFlip.length>=3?"Wackelig":pct<15?"Knapp":pct<30?"Deutlich":"Klar"), tight=["Kopf an Kopf","Wackelig","Knapp"].includes(vd);
+  const ks=knobs(L.cls,H.cls), flipsH=ks.filter(k=>k.lead===H.cls).sort((a,b)=>a.size-b.size||a.gap-b.gap), anyFlip=ks.filter(k=>k.lead!==L.cls).sort((a,b)=>a.size-b.size);
+  const small=anyFlip.filter(k=>k.size===1);
+  const vd=verdict||(pct<15?(small.length?"Wackelig":"Knapp"):pct<30?(small.length>=2?"Wackelig":"Deutlich"):"Klar"), tight=["Kopf an Kopf","Wackelig","Knapp"].includes(vd);
+  const robust=!anyFlip.length?`Keine einzelne Änderung stößt ${CL[L.cls]} vom ersten Platz. Das Ergebnis ist stabil.`
+    :small.length?`${small.length===1?"Schon eine kleine Korrektur würde":`${small.length} kleine Korrekturen würden`} die Spitze ändern, etwa: ${small[0].label}. Hier lohnt sich ehrliches Nachdenken.`
+    :`Nur deutliche Kursänderungen würden die Spitze ändern, etwa: ${anyFlip[0].label}. Hast du deine Antworten so gemeint, steht das Ergebnis.`;
   const rows=diffRows(L,H), mx=Math.max(.01,...rows.map(r=>Math.abs(r.d)));
   const pro=rows.filter(r=>r.d>0.05).sort((a,b)=>b.d-a.d), con=rows.filter(r=>r.d<-0.05).sort((a,b)=>a.d-b.d);
-  const list=a=>a.slice(0,2).map(r=>`${r.l} (+${fmt(Math.abs(r.d))})`).join(" und ");
+  const list=a=>a.slice(0,2).map(r=>`${r.l} (+${fmt(Math.abs(r.d))}, ${shareOf(r.k)} % deines Spielerlebnisses)`).join(" und ");
   const story=[pro.length?`${CL[L.cls]} holt den Vorsprung vor allem bei ${list(pro)}. `:"", con.length?`${CL[H.cls]} punktet dagegen bei ${list(con)}.`:`${CL[H.cls]} liegt in keinem Bereich vorn.`];
   const kv=`--ca:var(--c-${L.cls});--cb:var(--c-${H.cls})`;
   const dRow=r=>el("div",{class:"drow"},
-    el("div",{class:"dl"},el("b",{},r.l),el("span",{class:"small muted"},r.d>0.05?`+${fmt(r.d)} für ${CL[L.cls]}`:r.d<-0.05?`+${fmt(-r.d)} für ${CL[H.cls]}`:"gleichauf")),
+    el("div",{class:"dl"},el("b",{},r.l),el("span",{class:"small muted"},`${shareOf(r.k)} % deines Spielerlebnisses`),el("span",{class:"small muted"},r.d>0.05?`+${fmt(r.d)} für ${CL[L.cls]}`:r.d<-0.05?`+${fmt(-r.d)} für ${CL[H.cls]}`:"gleichauf")),
     el("div",{class:"dv",style:kv,title:`${CL[L.cls]} ${fmt(r.a)} · ${CL[H.cls]} ${fmt(r.b)}`},
       el("div",{class:"half b"},el("i",{style:`width:${r.d<0?(-r.d/mx*100):0}%`})),
       el("div",{class:"half a"},el("i",{style:`width:${r.d>0?(r.d/mx*100):0}%`}))),
@@ -1022,22 +1052,25 @@ function closeBlock(ct){
   const tryBtn=k=>el("button",{class:"btn ghost",onclick(){undoSnap=JSON.stringify(st);k.apply(st);chal=H.cls;update();}},"Ausprobieren");
   const kRow=k=>{ const a=k.res.find(x=>x.cls===H.cls), b=k.res.find(x=>x.cls===L.cls);
     const tie=Math.abs((a?a.pts:0)-(b?b.pts:0))<0.05;
-    return el("li",{},el("div",{},el("b",{},k.label),el("div",{class:"small muted"},`${k.where} · danach ${CL[H.cls]} ${fmt(a?a.pts:0)} zu ${CL[L.cls]} ${fmt(b?b.pts:0)}${tie?", Gleichstand, entschieden über die Zahl abgedeckter Inhalte":""}`)),tryBtn(k)); };
+    return el("li",{},el("div",{class:"kt"},el("span",{class:"ksz s"+k.size},SIZE_L[k.size]),el("b",{},k.label),el("div",{class:"small"},k.ctx),el("div",{class:"small muted"},`${k.where} · danach ${CL[H.cls]} ${fmt(a?a.pts:0)} zu ${CL[L.cls]} ${fmt(b?b.pts:0)}${tie?", Gleichstand, entschieden über die Zahl abgedeckter Inhalte":""}`)),tryBtn(k)); };
   const others=anyFlip.filter(k=>k.lead!==H.cls).slice(0,3);
   return el("div",{class:"block close"},
     el("h3",{class:"sec"},"Wie knapp ist das?"),
     el("div",{class:"verdict",style:kv},el("span",{class:"vtag v"+(tight?"tight":"clear")},vd),
-      el("p",{style:"margin:0"},el("b",{},`${CL[L.cls]} liegt ${fmt(gap)} Punkte vor ${CL[H.cls]}`),` (${Math.round(pct)} % Vorsprung). `,robust)),
+      el("p",{style:"margin:0"},gap<0.05?[el("b",{},`${CL[L.cls]} und ${CL[H.cls]} liegen gleichauf.`)," Vorn steht, wer mehr Inhalte abdeckt. "]:[el("b",{},`${CL[L.cls]} liegt ${fmt(gap)} Punkte vor ${CL[H.cls]}`),` (${Math.round(pct)} % Vorsprung). `],robust)),
     undoSnap?el("div",{class:"callout undo"},el("span",{},el("b",{},"Du probierst gerade eine Änderung aus. "),"Gefällt dir das neue Ergebnis, lass es so. Sonst geh zurück."),
       el("button",{class:"btn",onclick(){st=JSON.parse(undoSnap);undoSnap=null;update();}},"Zurück zum vorherigen Stand")):null,
     el("div",{class:"chips"},el("span",{class:"small muted",style:"align-self:center"},"Vergleichen mit:"),
       ct.slice(1,5).concat(st.gut&&ct.slice(1,5).every(x=>x.cls!==st.gut)&&ct.some(x=>x.cls===st.gut)?[ct.find(x=>x.cls===st.gut)]:[]).map(x=>
         el("button",{class:"chip small",style:cc(x.cls),"aria-pressed":String(x.cls===H.cls),onclick(){chal=x.cls;render();}},`${CL[x.cls]}${x.cls===st.gut?" · Bauch":""}`))),
     el("p",{class:"stagehint small",style:"margin:0"},story),
-    el("div",{class:"drow"},el("span"),el("div",{class:"dlegend small",style:kv},el("span",{class:"b"},`◀ ${CL[H.cls]} vorn`),el("span",{class:"a"},`${CL[L.cls]} vorn ▶`))),
-    el("div",{class:"dlist"},rows.filter(r=>r.a||r.b).sort((a,b)=>Math.abs(b.d)-Math.abs(a.d)).map(dRow)),
+    el("p",{class:"small muted",style:"margin:0"},"Die Prozentangaben zeigen, welchen Anteil ein Bereich an deinem gesamten Spielerlebnis hat, so wie du ihn gewichtet hast. Ein Vorsprung in einem großen Bereich wiegt im Alltag mehr als einer in einem kleinen."),
+    rows.some(r=>Math.abs(r.d)>=0.05)?el("div",{class:"drow"},el("span"),el("div",{class:"dlegend small",style:kv},el("span",{class:"b"},`◀ ${CL[H.cls]} vorn`),el("span",{class:"a"},`${CL[L.cls]} vorn ▶`))):null,
+    el("div",{class:"dlist"},rows.filter(r=>(r.a||r.b)&&Math.abs(r.d)>=0.05).sort((a,b)=>Math.abs(b.d)-Math.abs(a.d)).map(dRow)),
+    (()=>{ const eq=rows.filter(r=>(r.a||r.b)&&Math.abs(r.d)<0.05); return eq.length?el("p",{class:"small muted",style:"margin:0"},`Gleichauf: ${eq.map(r=>r.l).join(", ")}.`):null; })(),
+    (()=>{ const un=ct.slice(0,4).filter(x=>st.fan[x.cls]==null); return un.length?el("div",{class:"callout"},el("b",{},"Tipp: "),`Du hast ${un.map(x=>CL[x.cls]).join(", ")} in der Fantasie noch nicht bewertet. Weil die Fantasie viel Gewicht hat, wird das Ergebnis deutlich belastbarer, wenn du das nachholst.`,el("button",{class:"linkbtn",style:"margin-left:6px",onclick(){go("fantasy");}},"Zur Fantasie")):null; })(),
     el("h3",{class:"sec",style:"margin-top:8px"},"Stellschrauben"),
-    el("p",{class:"stagehint small",style:"margin:0"},flipsH.length?`Jede dieser Änderungen allein würde ${CL[H.cls]} auf Platz 1 bringen. Probier sie aus, du kannst jederzeit zurück. Ändere nur, was du ehrlich anders siehst, nicht nur, um ein Wunschergebnis zu erzwingen.`:`Keine einzelne Änderung bringt ${CL[H.cls]} auf Platz 1. Dafür müsstest du mehrere Antworten grundlegend anders sehen.`),
+    el("p",{class:"stagehint small",style:"margin:0"},flipsH.length?`Jede dieser Änderungen allein würde ${CL[H.cls]} auf Platz 1 bringen, sortiert von klein nach groß. Eine kleine Korrektur heißt: Du hast dich vielleicht nur etwas verschätzt. Eine große Kursänderung heißt: Du müsstest grundlegend anders spielen wollen, als du angegeben hast. Ändere nur, was du ehrlich anders siehst.`:`Keine einzelne Änderung bringt ${CL[H.cls]} auf Platz 1. Dafür müsstest du mehrere Antworten grundlegend anders sehen.`),
     flipsH.length?el("ul",{class:"knobs"},flipsH.slice(0,6).map(kRow)):null,
     others.length?el("p",{class:"small muted",style:"margin:0"},"Andere Regler würden eine dritte Klasse nach vorn bringen: "+others.map(k=>`${k.label} → ${CL[k.lead]}`).join(" · ")+"."):null,
     el("div",{class:"actions"},el("button",{class:"btn ghost",onclick(){go("review");}},"Alles im Rückblick neu bewerten")));
@@ -1058,73 +1091,88 @@ function frictionList(cls,compact){ const fr=classFrictions(cls); if(!fr.length)
   return el("ul",{class:"frlist"+(compact?" compact":"")},fr.map(f=>el("li",{class:f.full?"full":"part"},
     el("span",{class:"frq"},f.title), el("div",{class:"small muted frqq"},f.sub),
     el("div",{class:"small"},f.full?"Gilt für die ganze Klasse, keine Spezialisierung umgeht das.":`Betrifft ${f.hit.map(i=>S[i].name).join(", ")}. Als ${f.ok.map(i=>S[i].name).join(" oder ")} passt es.`)))); }
+const openSec=new Set();
+function sect(id,title,sub,body){ return el("details",{class:"sect",open:openSec.has(id)?true:null,ontoggle(e){ if(e.target.open) openSec.add(id); else openSec.delete(id); }},
+  el("summary",{},el("span",{class:"st"},title),sub?el("span",{class:"small muted"},sub):null), el("div",{class:"sbody"},body)); }
+function raceScore(r){ let v=0; if(st.f.race[r.id]===1) v+=3; if(st.f.fac[r.fac]===1) v+=2; if(st.f.race[r.id]===-1) v-=3; if(st.f.fac[r.fac]===-1) v-=3; return v; }
+function raceRec(cls){ const list=racesFor(cls).map(r=>({r,v:raceScore(r)})).sort((a,b)=>b.v-a.v||(a.r.fac===b.r.fac?0:a.r.fac==="horde"?-1:1));
+  const top=list[0]; const why=[]; if(top&&st.f.race[top.r.id]===1) why.push(`du hast ${raceName(top.r)} auf „gern“ gesetzt`); if(top&&st.f.fac[top.r.fac]===1) why.push(`du willst ${FAC_L[top.r.fac]} spielen`);
+  return {list, rec:top&&top.v>0?top.r:null, why}; }
+function raceCard(r,cls,tag){ return el("div",{class:"ccls race-card",style:cc(cls)},
+  el("div",{class:"h"},el("b",{},raceName(r)),el("span",{class:"small muted"},FAC_L[r.fac])),
+  el("div",{class:"chips"},tag?el("span",{class:"tag good"},tag):null,st.f.race[r.id]===1&&!tag?el("span",{class:"tag good"},"deine Vorliebe"):null,(st.f.race[r.id]===-1||st.f.fac[r.fac]===-1)?el("span",{class:"tag"},"eher nicht"):null,r.new.includes(cls)?el("span",{class:"tag"},r.new.length>=5?"neues Volk":"neue Kombination"):null),
+  racialList(r,"racials rb")); }
+function raceSection(cls){ const {list,rec,why}=raceRec(cls), rest=list.map(x=>x.r).filter(r=>r!==rec);
+  return el("div",{class:"block"},el("h3",{class:"sec"},`Dein Volk für ${CL[cls]}`),
+    rec?el("p",{class:"stagehint small",style:"margin:0"},`Empfehlung, weil ${why.join(" und ")}. Jedes Volk hat zwei aktive Fähigkeiten, die du auslöst, und zwei passive, die immer wirken.`)
+       :el("p",{class:"stagehint small",style:"margin:0"},`Du hast kein Volk und keine Fraktion bevorzugt, deshalb gibt es hier keine Empfehlung. ${list.length} Völker können ${CL[cls]} spielen. Sprecht euch in der Gruppe ab: Horde und Allianz können nicht zusammen spielen.`),
+    rec?el("div",{class:"recrace"},raceCard(rec,cls,"Empfehlung")):null,
+    sect("races-"+cls,rec?`Alle anderen Völker für ${CL[cls]}`:`Alle Völker für ${CL[cls]}`,`${rest.length} weitere`,el("div",{class:"ccards"},rest.map(r=>raceCard(r,cls)))),
+    el("p",{class:"small muted",style:"margin:0"},"Werte laut Beta-Client, sie können sich bis zum Launch noch ändern.")); }
 function stageResult(){
   const ct=classTotals().filter(x=>x.pts>0);
   if(!ct.length) return [head("Ergebnis","Noch kein Ergebnis","Wähle Inhalte und geh sie durch. Dann sammeln die Klassen Punkte."),navRow()];
   const m=ct[0], alts=ct.slice(1,4), short=n=>n.replace("Wilder Kampf · ","").replace("Verstärkung · ","Verst. ");
   const perLine=x=>st.content.filter(cid=>x.per[cid]).map(cid=>`${cById(cid).name}: ${S[x.per[cid].i].name}`);
   const specRank=x=>x.specs.filter(y=>y.pts>0).sort((a,b)=>b.pts-a.pts);
-  const out=[head("Ergebnis","Deine Klasse für Forever","Verglichen werden ganze Klassen, denn wie die Entwickler sagen: Man spielt die Klasse, nicht die Spezialisierung. Pro Inhalt zählt die Spezialisierung, mit der die Klasse dort am besten zu dir passt. Umskillen kannst du beim Trainer und ab Stufe 40 per Dual-Spezialisierung.")];
-  out.push(el("div",{class:"podium"},
-    el("div",{class:"main-card",style:cc(m.cls)},el("div",{class:"k"},`Platz 1 · ${fmt(m.pts)} Punkte · ${m.covered} von ${st.content.length} Inhalten abgedeckt`),el("div",{class:"n mainn"},emblem(m.cls,64),CL[m.cls]),
-      el("p",{class:"small",style:"margin:0"},DATA.fantasy[m.cls].line,st.fan[m.cls]!=null?el("span",{class:"tag good",style:"margin-left:8px"},FAN_L[st.fan[m.cls]]):null),
-      el("div",{class:"block",style:"gap:4px"},el("div",{class:"flabel"},"So spielst du sie je nach Inhalt"),el("ul",{class:"plist"},perLine(m).map(l=>el("li",{class:"small"},l)))),
-      el("div",{class:"small muted"},"Spezialisierungen nach Passung: "+specRank(m).map(y=>`${S[y.i].name} (${fmt(y.pts)})`).join(" · ")),
-      classFrictions(m.cls).length?el("div",{class:"block",style:"gap:4px"},el("div",{class:"flabel"},"Woran es trotzdem haken könnte"),frictionList(m.cls)):null,
-      el("button",{class:"linkbtn",onclick(){openClass(m.cls);}},`Mehr über ${CL[m.cls]} in Forever`)),
-    el("div",{class:"alts"},el("div",{class:"flabel"},"Deine Twinks"),alts.map(x=>el("div",{class:"alt",style:cc(x.cls)},el("span",{class:"c"},CL[x.cls]),
-      el("span",{class:"pts muted"},`${fmt(x.pts)} Punkte · ${x.covered} von ${st.content.length} Inhalten · am besten als ${specRank(x)[0]?S[specRank(x)[0].i].name:"–"}`),
-      (()=>{const fr=classFrictions(x.cls), nf=fr.filter(f=>f.full).length; return fr.length?el("span",{class:"small frsum "+(nf?"full":"part")},nf?`Reibt sich bei ${nf} deiner Antworten als ganze Klasse`:`${fr.length} ${fr.length===1?"Reibung":"Reibungen"}, per Spezialisierung umgehbar`):null;})(),el("button",{class:"linkbtn",onclick(){openClass(x.cls);}},"Klasse ansehen"))))));
+  const rr=raceRec(m.cls), br=rr.rec, top=specRank(m)[0];
+  const out=[head("Ergebnis","Deine Klasse für Forever","Verglichen werden ganze Klassen, denn man spielt die Klasse, nicht die Spezialisierung. Umskillen kannst du beim Trainer, ab Stufe 40 auch per Dual-Spezialisierung.")];
+  // 1 main
+  out.push(el("div",{class:"main-card",style:cc(m.cls)},
+    el("div",{class:"k"},`Platz 1 · ${fmt(m.pts)} Punkte · ${m.covered} von ${st.content.length} Inhalten passen`),
+    el("div",{class:"n mainn"},emblem(m.cls,64),el("span",{},br?el("small",{class:"rpre"},raceName(br)):null,CL[m.cls])),
+    el("p",{class:"small",style:"margin:0"},DATA.fantasy[m.cls].line,st.fan[m.cls]!=null?el("span",{class:"tag good",style:"margin-left:8px"},FAN_L[st.fan[m.cls]]):null),
+    el("p",{style:"margin:0"},el("b",{},"Starte als "),top?S[top.i].name:CL[m.cls],". Wechsle die Spezialisierung, wenn Inhalt, Ausrüstung oder Gruppe es verlangen."),
+    perLine(m).length>1?el("div",{class:"block",style:"gap:4px"},el("div",{class:"flabel"},"So spielst du sie je nach Inhalt"),el("ul",{class:"plist"},perLine(m).map(l=>el("li",{class:"small"},l)))):null,
+    classFrictions(m.cls).length?el("div",{class:"block",style:"gap:4px"},el("div",{class:"flabel"},"Woran es trotzdem haken könnte"),frictionList(m.cls)):null,
+    el("p",{class:"small muted",style:"margin:0"},el("b",{},"Ein Beta-Spieler warnt augenzwinkernd: "),DATA.annoy[m.cls]),
+    el("button",{class:"linkbtn",onclick(){openClass(m.cls);}},`Mehr über ${CL[m.cls]} in Forever`)));
+  // 2 share
+  out.push(shareBlock());
+  // 2b closeness, kept high up
   out.push(closeBlock(ct));
-  const rows=ct.map(x=>el("tr",{style:cc(x.cls)},el("td",{},el("span",{class:"cc"},CL[x.cls])),
-    st.content.map(cid=>{const b=x.per[cid];return el("td",{class:`m ${b?(b.st==="nr"?"nr":"in"):"out"}`,title:b?S[b.i].name:"keine passende Spezialisierung"},b?[fmt(b.pts),el("br"),el("span",{class:"small muted"},short(S[b.i].name))]:"·");}),
-    el("td",{class:"m in",title:st.fan[x.cls]!=null?FAN_L[st.fan[x.cls]]:"nicht bewertet"},x.fan?"+"+fmt(x.fan):"–"),el("td",{class:"m in"},x.aes?"+"+fmt(x.aes):"–"),
-    el("td",{class:"m in"},x.fund?"+"+fmt(x.fund):"–"),el("td",{class:"tot"},fmt(x.pts))));
-  out.push(el("div",{class:"block"},el("h3",{class:"sec"},"Woher die Punkte kommen"),el("p",{class:"stagehint small"},"Unter jeder Zahl steht die Spezialisierung, die für diesen Inhalt zählt. Gelb heißt knapp passend."),
-    el("div",{class:"tablebox"},el("table",{class:"matrix"},el("thead",{},el("tr",{},el("th",{},"Klasse"),st.content.map(cid=>el("th",{title:cById(cid).name},cById(cid).name.split(" ")[0])),el("th",{},"Fantasie"),el("th",{},"Optik"),el("th",{},"Vorliebe"),el("th",{style:"text-align:right"},"Summe"))),el("tbody",{},rows)))));
-  const frRows=ct.map((x,k)=>({x,k,fr:classFrictions(x.cls)})).filter(r=>r.fr.length);
-  out.push(el("div",{class:"block"},el("h3",{class:"sec"},"Woran sich jede Klasse reibt"),
-    el("p",{class:"stagehint small"},"Keine Antwort wirft eine Klasse raus, auch kein „eher nicht“. Sie kosten nur Punkte. Hier steht, was das konkret heißt. Rot gilt für die ganze Klasse und ist ein echter Grund, warum sie als Main schwierig werden kann. Gelb lässt sich mit einer anderen Spezialisierung umgehen."),
-    frRows.length?el("div",{class:"frgrid"},frRows.map(({x,k,fr})=>el("div",{class:"frcard",style:cc(x.cls)},
-      el("div",{class:"h"},el("b",{},`Platz ${k+1} · ${CL[x.cls]}`),el("span",{class:"small muted"},`${fmt(x.pts)} Punkte`)),frictionList(x.cls,true)))):
-      el("div",{class:"empty"},"Keine Klasse reibt sich an deinen Antworten.")));
+  // 3 race
+  out.push(raceSection(m.cls));
+  // 4 twinks
+  out.push(el("div",{class:"block"},el("h3",{class:"sec"},"Deine Twinks"),el("p",{class:"stagehint small",style:"margin:0"},"Platz 2 bis 4. Gut als Zweitcharakter oder als Plan B, falls sich dein Main nicht richtig anfühlt."),
+    el("div",{class:"twgrid"},alts.map((x,k)=>el("div",{class:"alt",style:cc(x.cls)},el("span",{class:"c"},emblem(x.cls,28),`${k+2}. ${CL[x.cls]}`),
+      el("span",{class:"pts muted"},`${fmt(x.pts)} Punkte · am besten als ${specRank(x)[0]?S[specRank(x)[0].i].name:"–"}`),
+      (()=>{const fr=classFrictions(x.cls), nf=fr.filter(f=>f.full).length; return fr.length?el("span",{class:"small frsum "+(nf?"full":"part")},nf?`Reibt sich bei ${nf} deiner Antworten als ganze Klasse`:`${fr.length} ${fr.length===1?"Reibung":"Reibungen"}, per Spezialisierung umgehbar`):null;})(),
+      el("button",{class:"linkbtn",onclick(){openClass(x.cls);}},"Klasse ansehen"))))));
   if(st.gut){ const pos=ct.findIndex(x=>x.cls===st.gut)+1;
     out.push(el("div",{class:"callout"},st.gut===m.cls?[el("b",{},"Kopf und Bauch sind sich einig. "),`Du würdest zuerst ${CL[st.gut]} anklicken, und die Rechnung sieht das genauso.`]:
-      [el("b",{},`Dein Bauch sagt ${CL[st.gut]}. `),pos?`Die Rechnung sieht die Klasse auf Platz ${pos}. `:"Die Rechnung hat die Klasse ausgeschlossen. ","Liegen beide nah beieinander, ist das Bauchgefühl ein guter Tiebreaker. Du verbringst Hunderte Stunden mit diesem Charakter, er muss dir gefallen."])); }
-  out.push(raceBlock(m.cls));
+      [el("b",{},`Dein Bauch sagt ${CL[st.gut]}. `),`Die Rechnung sieht die Klasse auf Platz ${pos}. `,"Liegen beide nah beieinander, ist das Bauchgefühl ein guter Tiebreaker. Du verbringst Hunderte Stunden mit diesem Charakter, er muss dir gefallen."])); }
+  // 5 details on demand
+  const pct=ct[1]&&m.pts?Math.round((m.pts-ct[1].pts)/m.pts*100):0;
+  const rows=ct.map(x=>el("tr",{style:cc(x.cls)},el("td",{},el("span",{class:"cc"},CL[x.cls])),
+    st.content.map(cid=>{const b=x.per[cid];return el("td",{class:`m ${b?(b.st==="nr"?"nr":b.st==="in"?"in":"out"):"out"}`,title:b?S[b.i].name:"keine passende Spezialisierung"},b?[fmt(b.pts),el("br"),el("span",{class:"small muted"},short(S[b.i].name))]:"·");}),
+    el("td",{class:"m in",title:st.fan[x.cls]!=null?FAN_L[st.fan[x.cls]]:"nicht bewertet"},x.fan?"+"+fmt(x.fan):"–"),el("td",{class:"m in"},x.aes?"+"+fmt(x.aes):"–"),
+    el("td",{class:"m in"},x.fund?"+"+fmt(x.fund):"–"),el("td",{class:"tot"},fmt(x.pts))));
+  const frRows=ct.map((x,k)=>({x,k,fr:classFrictions(x.cls)})).filter(r=>r.fr.length);
   const tm=st.taste.time, farm=st.content.includes("farming");
-  out.push(el("div",{class:"block"},el("h3",{class:"sec"},"Deine ersten Legacy-Punkte"),
-    el("p",{class:"stagehint small"},"Jeder Charakter kann zum Start bis zu 16 Legacy-Punkte ausgeben. Punkte gibt es etwa für jede Klasse auf Stufe 25, 45 und 60 und für Herstellungsberufe auf 150, 225 und 300. Ein Reset kostet 10 Gold."),
-    el("div",{class:"ccards"},
-      el("div",{class:"ccls",style:"--cc:var(--accent)"},el("div",{class:"h"},el("b",{},tm===0?"Well Rested":"Thrill of the Adventure"),el("span",{class:"tag good"},"Empfehlung")),
-        el("p",{class:"small muted",style:"margin:0"},tm===0?"Mehr Ruhebonus. Lohnt sich, wenn du nur eine Stunde am Abend oder alle paar Tage spielst.":"Jeder Kill gibt bis zu 5 % Gesundheit und Mana zurück. Weniger Essen und Trinken, flüssigeres Questen.")),
-      el("div",{class:"ccls",style:"--cc:var(--muted)"},el("div",{class:"h"},el("b",{},tm===0?"Thrill of the Adventure":"Well Rested"),el("span",{class:"small muted"},"Alternative")),
-        el("p",{class:"small muted",style:"margin:0"},tm===0?"Die stärkere Wahl, sobald du regelmäßig mehrere Stunden am Stück spielst.":"Lohnt sich erst, wenn du oft länger offline bist.")),
-      el("div",{class:"ccls",style:"--cc:var(--narrow)"},el("div",{class:"h"},el("b",{},"Working Overtime"),el("span",{class:"small muted"},farm?"passt zu deinem Farmen":"für Berufe")),
-        el("p",{class:"small muted",style:"margin:0"},"Bis zu 20 % höhere Chance auf Berufspunkte. Spart beim Hochleveln von Berufen viel Gold.")))));
-  out.push(el("div",{class:"callout"},el("b",{},"In Forever ist keine Zeit verschwendet. "),"Was dich reizt, aber nicht gewinnt, wird ein Twink, ein Handwerker oder sammelt Legacy-Punkte. Überrascht dich das Ergebnis, schau in den Rückblick."));
-  // final recommendation
-  const br=bestRace(m.cls), top=specRank(m)[0];
-  out.push(el("div",{class:"final",style:cc(m.cls)},el("div",{class:"k"},"Deine Empfehlung"),
-    el("div",{class:"fn"},emblem(m.cls,72),el("span",{class:"fnt"},br?`${raceName(br)} · `:"",el("span",{},CL[m.cls]))),
-    el("p",{class:"small muted"},el("b",{},"Ein Beta-Spieler warnt augenzwinkernd: "),DATA.annoy[m.cls]),
-    el("p",{},`Starte als ${top?S[top.i].name:CL[m.cls]}${br?"":" mit einem Volk deiner Wahl"} und wechsle die Spezialisierung, wenn Inhalt, Ausrüstung oder Gruppe es verlangen.${alts[0]?` Als ersten Twink bietet sich ${CL[alts[0].cls]} an.`:""}`),
-    el("div",{class:"actions"},el("button",{class:"btn",onclick(){setTab("group");}},"Gruppe ansehen"),el("button",{class:"btn ghost",onclick(){go("review");}},"Zum Rückblick"))));
-  out.push(shareBlock());
+  out.push(el("div",{class:"block"},el("h3",{class:"sec"},"Hintergründe zum Aufklappen"),el("p",{class:"stagehint small",style:"margin:0"},"Für alle, die es genau wissen wollen."),
+    el("div",{class:"sects"},
+      sect("matrix","Woher die Punkte kommen","Alle Klassen, alle Inhalte",[el("p",{class:"stagehint small"},"Unter jeder Zahl steht die Spezialisierung, die für diesen Inhalt zählt. Gelb heißt knapp passend, grau passt kaum."),
+        el("div",{class:"tablebox"},el("table",{class:"matrix"},el("thead",{},el("tr",{},el("th",{},"Klasse"),st.content.map(cid=>el("th",{title:cById(cid).name},cById(cid).name.split(" ")[0])),el("th",{},"Fantasie"),el("th",{},"Optik"),el("th",{},"Vorliebe"),el("th",{style:"text-align:right"},"Summe"))),el("tbody",{},rows)))]),
+      sect("friction","Woran sich jede Klasse reibt",`${frRows.length} ${frRows.length===1?"Klasse":"Klassen"} mit Reibungen`,[
+        el("p",{class:"stagehint small"},"Keine Antwort wirft eine Klasse raus, auch kein „eher nicht“. Sie kosten nur Punkte. Rot gilt für die ganze Klasse und ist ein echter Grund, warum sie als Main schwierig werden kann. Gelb lässt sich mit einer anderen Spezialisierung umgehen."),
+        frRows.length?el("div",{class:"frgrid"},frRows.map(({x,k,fr})=>el("div",{class:"frcard",style:cc(x.cls)},
+          el("div",{class:"h"},el("b",{},`Platz ${k+1} · ${CL[x.cls]}`),el("span",{class:"small muted"},`${fmt(x.pts)} Punkte`)),frictionList(x.cls,true)))):
+          el("div",{class:"empty"},"Keine Klasse reibt sich an deinen Antworten.")]),
+      sect("legacy","Deine ersten Legacy-Punkte","Startboni für jeden neuen Charakter",[
+        el("p",{class:"stagehint small"},"Jeder Charakter kann zum Start bis zu 16 Legacy-Punkte ausgeben. Punkte gibt es etwa für jede Klasse auf Stufe 25, 45 und 60 und für Herstellungsberufe auf 150, 225 und 300. Ein Reset kostet 10 Gold."),
+        el("div",{class:"ccards"},
+          el("div",{class:"ccls",style:"--cc:var(--accent)"},el("div",{class:"h"},el("b",{},tm===0?"Well Rested":"Thrill of the Adventure"),el("span",{class:"tag good"},"Empfehlung")),
+            el("p",{class:"small muted",style:"margin:0"},tm===0?"Mehr Ruhebonus. Lohnt sich, wenn du nur eine Stunde am Abend oder alle paar Tage spielst.":"Jeder Kill gibt bis zu 5 % Gesundheit und Mana zurück. Weniger Essen und Trinken, flüssigeres Questen.")),
+          el("div",{class:"ccls",style:"--cc:var(--muted)"},el("div",{class:"h"},el("b",{},tm===0?"Thrill of the Adventure":"Well Rested"),el("span",{class:"small muted"},"Alternative")),
+            el("p",{class:"small muted",style:"margin:0"},tm===0?"Die stärkere Wahl, sobald du regelmäßig mehrere Stunden am Stück spielst.":"Lohnt sich erst, wenn du oft länger offline bist.")),
+          el("div",{class:"ccls",style:"--cc:var(--narrow)"},el("div",{class:"h"},el("b",{},"Working Overtime"),el("span",{class:"small muted"},farm?"passt zu deinem Farmen":"für Berufe")),
+            el("p",{class:"small muted",style:"margin:0"},"Bis zu 20 % höhere Chance auf Berufspunkte. Spart beim Hochleveln von Berufen viel Gold.")))]))));
+  out.push(el("div",{class:"callout"},el("b",{},"In Forever ist keine Zeit verschwendet. "),"Was dich reizt, aber nicht gewinnt, wird ein Twink, ein Handwerker oder sammelt Legacy-Punkte. Überrascht dich das Ergebnis, schau in den Rückblick oder mach die Gegenprobe."));
   out.push(navRow());
   return out;
 }
 
-function raceBlock(cls){
-  const lr=new Set(likedRaces().map(r=>r.id));
-  const al=racesFor(cls).filter(raceAllowed), list=(al.length?al:racesFor(cls)).sort((a,b)=>(lr.has(b.id)-lr.has(a.id))||(a.fac===b.fac?0:a.fac==="horde"?-1:1));
-  return el("div",{class:"block"},el("h3",{class:"sec"},`Mit welchem Volk spielst du ${CL[cls]}?`),
-    el("p",{class:"stagehint small"},"Jedes Volk hat zwei aktive Fähigkeiten, die du auslöst, und zwei passive, die immer wirken. Werte laut Beta-Client, sie können sich bis zum Launch noch ändern."),
-    el("div",{class:"ccards"},list.map(r=>el("div",{class:"ccls race-card",style:cc(cls)},
-      el("div",{class:"h"},el("b",{},raceName(r)),el("span",{class:"small muted"},FAC_L[r.fac])),
-      el("div",{class:"chips"},lr.has(r.id)?el("span",{class:"tag good"},"deine Vorliebe"):null,r.new.includes(cls)?el("span",{class:"tag"},r.new.length>=5?"neues Volk":"neue Kombination"):null),
-      racialList(r,"racials rb")))));
-}
 /* ================= side tally ================= */
 function renderSide(){
   const side=$("side"); side.replaceChildren();
