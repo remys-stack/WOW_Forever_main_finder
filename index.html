@@ -236,6 +236,11 @@ td.fixed .ab{box-shadow:0 0 0 2px var(--accent)}
 .syncbox{border:1px solid var(--accent);border-radius:14px;padding:16px;background:var(--surface)}
 .btcopy{border:0;background:none;padding:0;color:var(--muted);font-family:var(--f-mono);font-size:12px;cursor:pointer;text-decoration:underline dotted}
 .mf input.bt{width:12em}
+.mf input.need{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 30%,transparent)}
+.flabel.needl{color:var(--accent)}
+.mf input.flash{animation:btflash 1.4s ease-out 1}
+@keyframes btflash{0%,40%{box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 55%,transparent);border-color:var(--accent)}100%{box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 30%,transparent)}}
+@media (prefers-reduced-motion:reduce){.mf input.flash{animation:none}}
 @media (max-width:420px){.ab,.ac{width:30px;min-width:30px;height:28px}.avail th,.avail td{padding:3px 2px}}
 .srcgrid ul{margin:4px 0 0;padding-left:18px;display:grid;gap:4px}
 @media (max-width:640px){.coverage{grid-template-columns:repeat(2,minmax(0,1fr))}.cov.wide{grid-column:1/-1}}
@@ -1453,8 +1458,8 @@ function renderMe(){
         el("select",{class:"asel",id:"me-main",onchange(e){me.m=e.target.value||null;update();}},
           el("option",{value:"",selected:me.m?null:true},auto?`laut Finder: ${CL[auto]}`:"noch offen"),
           Object.entries(CL).map(([k,l])=>el("option",{value:k,selected:me.m===k?true:null},l)))),
-      el("label",{class:"mf"},el("span",{class:"flabel"},"Battletag"),
-        el("input",{type:"text",class:"bt",id:"me-bt",maxlength:"24",placeholder:"Name#1234",autocomplete:"off",value:me.bt||null,
+      el("label",{class:"mf"},el("span",{class:"flabel"+(needBt()?" needl":"")},needBt()?"Battletag · für den Beitritt nötig":"Battletag"),
+        el("input",{type:"text",class:"bt"+(needBt()?" need":""),id:"me-bt",maxlength:"24",placeholder:"Name#1234",autocomplete:"off",value:me.bt||null,
           onchange(e){me.bt=e.target.value.trim(); update();}}),
         el("span",{class:"small "+(me.bt&&!BT_RE.test(me.bt)?"stale":"muted")},me.bt&&!BT_RE.test(me.bt)?"Form: Name#1234":"zum Adden im Spiel")),
       el("label",{class:"mf"},el("span",{class:"flabel"},"Stufe"),
@@ -1515,8 +1520,12 @@ async function push(){ const card=myCard(), body={op:"save",t:st.sync.t,n:card.n
   if(!card.bt) return; if(body.card===lastPushed) return;
   try{ const r=await api(body); if(!r.ok) return syncFail(r); lastPushed=body.card; syncErr=false; syncMsg=`Gespeichert um ${new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}.`; await pull(); }
   catch(e){ syncFail(null); } }
+/* Nutzerführung: zum Battletag-Feld springen und es hervorheben */
+function goBt(){ const i=$("me-bt"); if(!i) return; i.scrollIntoView({behavior:"smooth",block:"center"});
+  i.classList.remove("flash"); void i.offsetWidth; i.classList.add("flash"); setTimeout(()=>{ try{i.focus({preventScroll:true});}catch(e){} },350); }
+const needBt=()=>!!(SYNC&&st.sync.g&&!st.sync.t&&!BT_RE.test(st.me.bt||""));
 async function join(){ const bt=(st.me.bt||"").trim();
-  if(!BT_RE.test(bt)){ syncErr=true; syncMsg="Trag zuerst deinen Battletag ein, Form: Name#1234."; return render(); }
+  if(!BT_RE.test(bt)){ syncErr=true; syncMsg="Trag zuerst deinen Battletag ein, Form: Name#1234."; render(); return goBt(); }
   try{ const r=await api({op:"join",bt,n:(st.name||"").trim()}); if(!r.ok) return syncFail(r);
     st.sync.t=r.t; st.sync.id=r.id; syncErr=false; syncMsg=r.rejoin?"Wieder verbunden. Dein bisheriger Eintrag bleibt.":"Du bist drin."; lastPushed=null; save(); await push(); await pull(); }
   catch(e){ syncFail(null); } }
@@ -1540,7 +1549,7 @@ function renderSync(){
   if(!st.sync.t){ box.append(head,
     el("p",{class:"stagehint"},"Einmal beitreten, danach speichert die App deine Karte automatisch. Gespeichert werden Battletag, Charaktername, Main, Stufe, Zeiten und deine drei Finder-Klassen, nicht deine Antworten. Die Daten liegen in einer Google-Tabelle eurer Gruppe. Lesen kann sie, wer den Beitrittslink hat."),
     el("div",{class:"actions"},el("button",{class:"btn",id:"syncjoin",onclick(){join();}},"Beitreten")),
-    BT_RE.test(st.me.bt||"")?null:el("p",{class:"small muted",style:"margin:0"},"Dafür brauchst du deinen Battletag unter „Deine Karte“."),msg); return; }
+    BT_RE.test(st.me.bt||"")?null:el("p",{class:"small muted",style:"margin:0"},"Dafür brauchst du deinen Battletag unter ",el("button",{class:"linkbtn",onclick(){goBt();}},"Deine Karte"),"."),msg); return; }
   const at=st.rc&&st.rc.at?new Date(st.rc.at).toLocaleString("de-DE",{weekday:"short",hour:"2-digit",minute:"2-digit"}):"noch nie";
   box.append(head,
     el("p",{class:"stagehint"},`Verbunden${st.me.bt?` als ${st.me.bt}`:""}. Änderungen an deiner Karte speichert die App automatisch. Zuletzt geladen: ${at}.`),
