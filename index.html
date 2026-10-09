@@ -1389,9 +1389,11 @@ function renderClasses(){
 /* ================= group ================= */
 const BT_RE=/^[^\s#=+\-@][^\s#]{1,15}#\d{3,7}$/;
 function myCard(noBt){const ct=classTotals().filter(x=>x.pts>0), me=st.me, o={n:(st.name||"").trim()||"Ohne Namen",c:ct.slice(0,3).map(x=>[x.cls,Math.round(x.pts*10)/10])};
-  const auto=(ct[0]||{}).cls;
+  if(!o.c.length&&Array.isArray(me.cf)) o.c=me.cf.slice(0,3);
+  const auto=(ct[0]||{}).cls||(o.c[0]&&o.c[0][0]);
   const ch=me.ch.filter(x=>x.n||x.c||x.s==="main").map(x=>{const cls=x.c||(x.s==="main"?auto:null), r={n:(x.n||"").trim().slice(0,24),c:x.c||null,s:x.s==="main"?"main":"twink"}; if(x.l){r.l=x.l;r.d=x.d;}
-    const o=roleOrder(cls); if(o.length) r.o=o; const so=specOrder(cls); if(so.length) r.so=so;
+    let o=roleOrder(cls); if(!o.length&&x.o0&&(!x.c||x.c===figClsOf(x))) o=x.o0; if(o&&o.length) r.o=o;
+    let so=specOrder(cls); if(!so.length&&x.so0&&x.so0.every(i=>S[i]&&S[i].cls===cls)) so=x.so0; if(so.length) r.so=so;
     if(x.sp&&Object.keys(x.sp).length&&cls&&Object.keys(x.sp).every(i=>S[i]&&S[i].cls===cls)) r.sp=Object.assign({},x.sp);
     if(x.r&&Object.keys(x.r).length) r.r=Object.assign({},x.r); return r;}).filter(x=>x.n||x.c||x.o||x.r||x.sp);
   if(ch.length){ if(!ch.some(x=>x.s==="main")) ch[0].s="main"; o.ch=ch; }
@@ -1523,9 +1525,11 @@ function availGrid(a,onTap,counts,total){
       return el("td",{class:fixed?"fixed":null},el("button",{class:"ab","aria-pressed":String(on),"aria-label":`${DAYS_L[di]} ${sl}`,onclick(){onTap(i);}},on?"✓":""));}))))));
 }
 let lastSpec=null;
+const figClsOf=x=>x.c||(x.so0&&S[x.so0[0]]?S[x.so0[0]].cls:null);
 function specPrefs(x,cls){
   if(!cls) return el("span",{class:"small muted chroles"},"Spezialisierungen: erst Klasse wählen");
-  const so=specOrder(cls), manual=!!(x.sp&&Object.keys(x.sp).some(i=>S[i]&&S[i].cls===cls));
+  let so=specOrder(cls); if(!so.length&&x.so0&&x.so0.every(i=>S[i]&&S[i].cls===cls)) so=x.so0;
+  const manual=!!(x.sp&&Object.keys(x.sp).some(i=>S[i]&&S[i].cls===cls));
   const cur=i=>{ const v=specLevel({sp:manual?x.sp:null,so},i); return v==null?2:v; };
   return el("div",{class:"chroles"},el("span",{class:"small muted"},"Spezialisierungen:"),
     specsOf(cls).sort((a,b)=>cur(b)-cur(a)||((so.indexOf(a)+1)||99)-((so.indexOf(b)+1)||99)||a-b).map(i=>{ const p=cur(i), nm=S[i].name.replace(/^Wilder Kampf · /,""); return el("button",{class:"rp p"+p+(lastSpec===i?" moved":""),"aria-label":`${S[i].name} (${ROLE_N[roleOfSpec(i)]}): ${PREF_L[p]}, zum Ändern klicken`,title:`${ROLE_N[roleOfSpec(i)]} · klicken: gern, notfalls, nein`,
@@ -1637,8 +1641,9 @@ function timesBox(P){
 const SYNC=GR.sync||"";
 let pulling=false, pushT=null, lastPushed=null, syncMsg="", syncErr=false;
 function readJoinHash(){ const h=location.hash; if(!/^#gruppe/.test(h)) return;
-  const q=new URLSearchParams(h.slice(1).replace(/^gruppe&?/,"")), g=q.get("g"), t=q.get("t");
-  if(g&&/^[a-f0-9]{24,64}$/.test(g)){ if(g!==st.sync.g) st.sync={g,t:null,id:null}; if(t&&/^[a-f0-9]{24,64}$/.test(t)) st.sync.t=t; save(); }
+  const q=new URLSearchParams(h.slice(1).replace(/^gruppe&?/,"")), g=q.get("g"), t=q.get("t"), i=q.get("i");
+  if(g&&/^[a-f0-9]{24,64}$/.test(g)){ if(g!==st.sync.g) st.sync={g,t:null,id:null};
+    if(t&&/^[a-f0-9]{24,64}$/.test(t)){ if(t!==st.sync.t) st.meAt=null; st.sync.t=t; if(i&&/^[a-f0-9]{8,32}$/.test(i)) st.sync.id=i; } save(); }
   try{ history.replaceState(null,"",location.pathname+location.search+"#gruppe"); }catch(e){} }
 async function api(body){
   const r=await fetch(SYNC,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(Object.assign({g:st.sync.g},body))});
@@ -1650,13 +1655,36 @@ function syncFail(res){ syncErr=true;
   else if(res&&res.err==="bt") syncMsg="Der Battletag sieht nicht richtig aus. Form: Name#1234.";
   else syncMsg="Keine Verbindung zum Gruppenstand. Angezeigt wird der letzte bekannte Stand.";
   save(); render(); }
+/* Eigene Karte über Geräte hinweg: die jüngste Änderung gewinnt, Sheet oder dieses Gerät */
+const coreOf=c=>JSON.stringify({n:c.n,bt:c.bt||"",a:c.a||"",ch:(c.ch||[]).map(x=>[x.n||"",x.c||"",x.s,x.l||0,x.sp||null,x.r||null])});
+function meEmpty(){ return !st.me.ch.some(x=>x.n||x.c)&&!/1/.test(st.me.a||""); }
+function adopt(r){ const c=cleanCard(Object.assign({},r.card,{n:r.n,bt:r.bt}));
+  if(r.n&&r.n!=="Ohne Namen") st.name=r.n; if(c.bt) st.me.bt=c.bt; st.me.a=c.a||"";
+  if(c.ch&&c.ch.length) st.me.ch=c.ch.map(x=>({n:x.n||"",c:x.c||null,l:x.l||null,d:x.d||null,s:x.s,sp:x.sp,r:x.r,so0:x.so,o0:x.o}));
+  if(Array.isArray(c.c)&&c.c.length) st.me.cf=c.c;
+  try{ $("pname").value=st.name||""; }catch(e){} }
+let pulledOnce=false;
 async function pull(){ if(!SYNC||!st.sync.g) return; pulling=true;
   try{ const r=await api({op:"list"}); if(!r.ok) return syncFail(r);
-    st.rc={at:new Date().toISOString(),members:Array.isArray(r.members)?r.members.slice(0,40):[]}; syncErr=false; save(); renderGroup(); }
+    st.rc={at:new Date().toISOString(),members:Array.isArray(r.members)?r.members.slice(0,40):[]}; syncErr=false;
+    if(st.sync.t){ let mine=st.rc.members.find(m=>m.id===st.sync.id);
+      if(!mine&&BT_RE.test(st.me.bt||"")){ mine=st.rc.members.find(m=>(m.bt||"").toLowerCase()===st.me.bt.toLowerCase()); if(mine) st.sync.id=mine.id; }
+      if(mine){ const local=coreOf(myCard()), remote=coreOf(cleanCard(Object.assign({},mine.card,{n:mine.n,bt:mine.bt})));
+        const newer=!st.meAt||Date.parse(mine.u||0)>Date.parse(st.meAt);
+        if(remote!==local&&(meEmpty()||newer)&&mine.card&&Object.keys(mine.card).length){ adopt(mine); syncMsg="Deine Karte ist auf dem Stand von deinem anderen Gerät."; }
+        lastCore=coreOf(myCard()); lastPushed=null; } }
+    pulledOnce=true; save(); renderGroup(); }
   catch(e){ syncFail(null); } finally{ pulling=false; } }
-function schedulePush(){ if(!SYNC||!st.sync.t) return; clearTimeout(pushT); pushT=setTimeout(push,1500); }
-async function push(){ const card=myCard(), body={op:"save",t:st.sync.t,n:card.n,bt:card.bt||null,card:JSON.stringify(card)};
+let lastCore=null;
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden&&SYNC&&st.sync.g&&st.sync.t&&!pulling) pull(); });
+function schedulePush(){ if(!SYNC||!st.sync.t) return;
+  const core=coreOf(myCard()); if(lastCore!==null&&core!==lastCore){ st.meAt=new Date().toISOString(); lastCore=core; save(); }
+  clearTimeout(pushT); pushT=setTimeout(push,1500); }
+async function push(){ if(!pulledOnce){ await pull(); if(!pulledOnce) return; }
+  const card=myCard(), body={op:"save",t:st.sync.t,n:card.n,bt:card.bt||null,card:JSON.stringify(card)};
   if(!card.bt) return; if(body.card===lastPushed) return;
+  const mine=st.rc&&st.rc.members.find(m=>m.id===st.sync.id);
+  if(st.meAt===null&&mine&&mine.card&&Object.keys(mine.card).length) return;  // nichts geändert seit dem Verbinden: Sheet bleibt maßgeblich
   try{ const r=await api(body); if(!r.ok) return syncFail(r); lastPushed=body.card; syncErr=false; syncMsg=`Gespeichert um ${new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}.`; await pull(); }
   catch(e){ syncFail(null); } }
 /* Nutzerführung: zum Battletag-Feld springen und es hervorheben */
@@ -1666,7 +1694,7 @@ const needBt=()=>!!(SYNC&&st.sync.g&&!st.sync.t&&!BT_RE.test(st.me.bt||""));
 async function join(){ const bt=(st.me.bt||"").trim();
   if(!BT_RE.test(bt)){ syncErr=true; syncMsg="Trag zuerst deinen Battletag ein, Form: Name#1234."; render(); return goBt(); }
   try{ const r=await api({op:"join",bt,n:(st.name||"").trim()}); if(!r.ok) return syncFail(r);
-    st.sync.t=r.t; st.sync.id=r.id; syncErr=false; syncMsg=r.rejoin?"Wieder verbunden. Dein bisheriger Eintrag bleibt.":"Du bist drin."; lastPushed=null; save(); await push(); await pull(); }
+    st.sync.t=r.t; st.sync.id=r.id; st.meAt=r.rejoin?null:new Date().toISOString(); lastCore=null; syncErr=false; syncMsg=r.rejoin?"Wieder verbunden. Dein bisheriger Eintrag bleibt.":"Du bist drin."; lastPushed=null; save(); if(r.rejoin){ await pull(); } else { await push(); await pull(); } }
   catch(e){ syncFail(null); } }
 async function leave(){ if(!confirm("Deinen Eintrag aus dem gemeinsamen Stand löschen? Die anderen sehen dich dann nicht mehr.")) return;
   try{ const r=await api({op:"leave",t:st.sync.t}); if(!r.ok&&r.err!=="token") return syncFail(r); }catch(e){ return syncFail(null); }
@@ -1688,13 +1716,17 @@ function renderSync(){
   if(!st.sync.t){ put(box,head,
     el("p",{class:"stagehint"},"Einmal beitreten, danach speichert die App deine Karte automatisch. Gespeichert werden dein Name, Battletag, deine Figuren mit Stufen, deine Zeiten und deine drei Finder-Klassen, nicht deine Antworten. Die Daten liegen in einer Google-Tabelle eurer Gruppe. Lesen kann sie, wer den Beitrittslink hat."),
     el("div",{class:"actions"},el("button",{class:"btn",id:"syncjoin",onclick(){join();}},"Beitreten")),
+    st.rc&&st.rc.members.some(m=>BT_RE.test(m.bt||""))?el("div",{class:"block known"},
+      el("p",{class:"small",style:"margin:0"},el("b",{},"Schon dabei, etwa auf einem anderen Gerät? "),"Tipp auf deinen Battletag. Dieses Gerät übernimmt dann deine Karte, das andere bleibt verbunden."),
+      el("div",{class:"chips"},st.rc.members.filter(m=>BT_RE.test(m.bt||"")).map(m=>el("button",{class:"chip",onclick(){
+        if(!confirm(`Bist du ${m.bt}? Dieses Gerät wird mit deiner Karte verbunden.`)) return; st.me.bt=m.bt; join(); }},m.bt)))):null,
     BT_RE.test(st.me.bt||"")?null:el("p",{class:"small muted",style:"margin:0"},"Dafür brauchst du deinen Battletag unter ",el("button",{class:"linkbtn",onclick(){goBt();}},"Deine Karte"),"."),msg); return; }
   const at=st.rc&&st.rc.at?new Date(st.rc.at).toLocaleString("de-DE",{weekday:"short",hour:"2-digit",minute:"2-digit"}):"noch nie";
   put(box,head,
     el("p",{class:"stagehint"},`Verbunden${st.me.bt?` als ${st.me.bt}`:""}. Änderungen an deiner Karte speichert die App automatisch. Zuletzt geladen: ${at}.`),
     el("div",{class:"actions"},
       el("button",{class:"btn ghost",onclick(){pull();}},"Aktualisieren"),
-      el("button",{class:"btn ghost",onclick(e){ const link=`${location.origin}${location.pathname}#gruppe&g=${st.sync.g}&t=${st.sync.t}`;
+      el("button",{class:"btn ghost",onclick(e){ const link=`${location.origin}${location.pathname}#gruppe&g=${st.sync.g}&t=${st.sync.t}${st.sync.id?`&i=${st.sync.id}`:""}`;
         copyText(link,$("syncmsg2"),"Link kopiert. Öffne ihn auf deinem zweiten Gerät. Nicht weitergeben: Wer ihn hat, kann deinen Eintrag ändern."); }},"Zweites Gerät verbinden"),
       el("button",{class:"btn ghost",onclick(){ copyText(`${location.origin}${location.pathname}#gruppe&g=${st.sync.g}`,$("syncmsg2"),"Beitrittslink kopiert. Nur in eure Gruppe schicken."); }},"Beitrittslink kopieren"),
       el("button",{class:"linkbtn",onclick(){leave();}},"Austreten")),
@@ -1752,7 +1784,7 @@ $("addcodes").onclick=()=>{let ok=0,bad=0;for(const line of $("paste").value.spl
   const m=$("pastemsg");m.className="msg"+(bad?" err":"");m.textContent=ok||bad?`${ok} hinzugefügt${bad?`, ${bad} Code(s) nicht lesbar. Prüf, ob sie mit MF beginnen und vollständig kopiert sind.`:"."}`:"Füg zuerst mindestens einen Code ein.";
   if(ok)$("paste").value="";update();};
 
-function setTab(t){ if(t==="group"&&SYNC&&st.sync.g&&st.sync.t&&!pulling) pull();for(const k of ["finder","classes","group"]){$("view-"+k).hidden=k!==t;$("tab-"+k).setAttribute("aria-selected",String(k===t));}
+function setTab(t){ if(t==="group"&&SYNC&&st.sync.g&&!pulling) pull();for(const k of ["finder","classes","group"]){$("view-"+k).hidden=k!==t;$("tab-"+k).setAttribute("aria-selected",String(k===t));}
   $("pbar").style.visibility=t==="finder"?"visible":"hidden"; if(t==="group")renderGroup(); if(t==="classes")renderClasses(); if(t!=="finder")window.scrollTo({top:0});}
 function openClass(k){st.ci=k;save();setTab("classes");}
 $("tab-finder").onclick=()=>setTab("finder"); $("tab-group").onclick=()=>setTab("group"); $("tab-classes").onclick=()=>setTab("classes");
@@ -1760,7 +1792,7 @@ $("pname").value=st.name; $("pname").addEventListener("input",e=>{st.name=e.targ
 render();
 readJoinHash();
 if(/^#gruppe/.test(location.hash)||st.sync.g&&!st.sync.t&&SYNC)setTab("group");
-if(SYNC&&st.sync.g&&st.sync.t) pull();
+if(SYNC&&st.sync.g) pull();
 </script>
 
 </body></html>
